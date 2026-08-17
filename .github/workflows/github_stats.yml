@@ -5,9 +5,9 @@ on:
   push:
     branches: [ main ]
 
-  # 2. 定时触发（每天 UTC 02:00，对应北京时间 10:00）
+  # 2. 定时触发（每天 UTC 02:17，对应北京时间 10:17）
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "17 2 * * *"
 
   # 3. 允许手动触发
   workflow_dispatch:
@@ -39,8 +39,24 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
+          set -e  # 任何命令失败就立即退出，并显示错误
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      
+          # 强制制造变更
+          echo "Last update: $(date -u)" > profile/last-update.txt
+      
           git add profile/
-          git commit -m "Update GitHub stats cards" || exit 0
+          
+          echo "📝 当前暂存变更："
+          git status
+          git diff --staged --stat
+      
+          echo "🚀 开始提交..."
+          git commit -m "Update GitHub stats cards $(date -u +%Y-%m-%d)"
+      
+          echo "🚀 推送到远程..."
           git push
+      
+          echo "✅ 提交并推送成功"
